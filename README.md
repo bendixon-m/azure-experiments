@@ -8,10 +8,11 @@ It was put together using these Azure docs:
 * Set up to run remotely, using [configure and submit training jobs](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-set-up-training-targets?view=azureml-api-1#select-a-compute-target)
 * [Train and deploy image classification](https://github.com/Azure/MachineLearningNotebooks/tree/master/tutorials/compute-instance-quickstarts/quickstart-azureml-in-10mins) guide, which uses [these](https://github.com/Azure/MachineLearningNotebooks/tree/master/tutorials/compute-instance-quickstarts/quickstart-azureml-in-10mins) notebooks.
 
-There are three jobs/runs defined here:
+There are several jobs/runs defined here:
 * `run-hello.py` - the "Hello world" run, a basic control script giving the URL for the run on the portal
 * `run-scikit.py` - trains a model, uses a conda YAML file to configure environment requirements, e.g. numpy, scikit-learn
-* `run-image-classification.py` - in progress!
+* `run-image-classification.py` - trains a model, attempts unsuccessfully to log results using mlflow
+
 
 
 ### To run

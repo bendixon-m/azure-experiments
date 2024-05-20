@@ -1,0 +1,11 @@
+name: image-classification
+dependencies:
+- pip:
+  - azureml-sdk
+  - scikit-learn
+  - numpy
+  - matplotlib
+  - joblib
+  - uuid
+  - requests
+  - azureml-opendatasets

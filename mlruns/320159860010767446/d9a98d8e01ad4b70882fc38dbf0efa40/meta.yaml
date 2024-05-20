@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/ben.dixon/Repos/azure-experiments/mlruns/320159860010767446/d9a98d8e01ad4b70882fc38dbf0efa40/artifacts
+end_time: 1716215793155
+entry_point_name: ''
+experiment_id: '320159860010767446'
+lifecycle_stage: active
+run_id: d9a98d8e01ad4b70882fc38dbf0efa40
+run_name: smiling-fowl-193
+run_uuid: d9a98d8e01ad4b70882fc38dbf0efa40
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1716215583043
+status: 4
+tags: []
+user_id: ben.dixon

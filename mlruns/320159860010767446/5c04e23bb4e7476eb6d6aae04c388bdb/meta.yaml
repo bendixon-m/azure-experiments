@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/ben.dixon/Repos/azure-experiments/mlruns/320159860010767446/5c04e23bb4e7476eb6d6aae04c388bdb/artifacts
+end_time: 1716214999172
+entry_point_name: ''
+experiment_id: '320159860010767446'
+lifecycle_stage: active
+run_id: 5c04e23bb4e7476eb6d6aae04c388bdb
+run_name: handsome-shrike-750
+run_uuid: 5c04e23bb4e7476eb6d6aae04c388bdb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1716214833164
+status: 3
+tags: []
+user_id: ben.dixon

@@ -1,0 +1,5 @@
+# Virtual environments
+.venv
+
+# Azure workspace config
+config.json

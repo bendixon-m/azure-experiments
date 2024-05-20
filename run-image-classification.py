@@ -6,36 +6,45 @@ from azureml.core.run import Run
 ws = Workspace.from_config()
 
 # set up MLflow to track the metrics
-experiment_name = "azure-ml-in10-mins-tutorial"
+experiment_name = "azure-image-classification"
+
 mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
 mlflow.set_experiment(experiment_name)
 mlflow.autolog()
 
-# Start logging to a new run in the experiment
-with mlflow.start_run() as run:
-    
-    # Set up the Azure ML experiment
-    # experiment = Experiment(workspace=ws, name='day2-image-classification')
-    config = ScriptRunConfig(source_directory='./src',
-                             script='train-image-classification.py',
-                             compute_target='ben-small-test')
 
-    env = Environment.from_conda_specification(name='image-classification',
-                                               file_path='image-classification.yaml')
-    config.run_config.environment = env
-    run = mlflow.start_run()
+# Set up the Azure ML experiment
+experiment = Experiment(workspace=ws, name=experiment_name)
+config = ScriptRunConfig(source_directory='./src',
+                            script='train-image-classification.py',
+                            compute_target='ben-small-test')
 
-    # azure_run = experiment.submit(config)
+env = Environment.from_conda_specification(name='image-classification',
+                                            file_path='azureml_envs/image-classification.yaml')
+config.run_config.environment = env
 
-    # Log the Azure ML run URL to MLflow
-    mlflow.log_param("azure_run_url", azure_run.get_portal_url())
 
-    # Wait for the run to complete
-    azure_run.wait_for_completion(show_output=True)
+# Submit the run
+run = experiment.submit(config)
 
-    # Log the run results
-    for metric_name, metric_value in azure_run.get_metrics().items():
-        mlflow.log_metric(metric_name, metric_value)
+# Track the run with MLflow
+mlflow.set_experiment(experiment_name)
 
-    # Register the model with MLflow
-    mlflow.azureml.log_model(azure_model=azure_run, registered_model_name="image-classification-model")
+with mlflow.start_run(run_id=run.id):
+    # Log parameters
+    mlflow.log_param('compute_target', 'ben-small-test')
+    mlflow.log_param('environment', env.name)
+
+    # Monitor the run
+    run.wait_for_completion(show_output=True)
+
+    # Log metrics
+    metrics = run.get_metrics()
+    for key, value in metrics.items():
+        mlflow.log_metric(key, value)
+
+    # Log artifacts
+    artifacts = run.get_file_names()
+    for artifact in artifacts:
+        if artifact.endswith('.pkl') or artifact.endswith('.txt'):
+            mlflow.log_artifact(run.download_file(artifact))

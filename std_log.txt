@@ -1,0 +1,10 @@
+{'infer_column_types': 'False', 'activity': 'download'}
+{'infer_column_types': 'False', 'activity': 'download', 'activityApp': 'FileDataset'}
+{'infer_column_types': 'False', 'activity': 'download', 'activityApp': 'FileDataset', 'runId': 'azure-image-classification_1716221219_a15a42c6'}
+{'infer_column_types': 'False', 'activity': 'download', 'activityApp': 'FileDataset', 'runId': 'azure-image-classification_1716221219_a15a42c6', 'run_id': 'azure-image-classification_1716221219_a15a42c6'}
+Image classification model started
+Model trained
+Mean squared error: 1.40
+Cleaning up all outstanding Run operations, waiting 300.0 seconds
+1 items cleaning up...
+Cleanup took 0.05806922912597656 seconds

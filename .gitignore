@@ -3,3 +3,6 @@
 
 # Azure workspace config
 config.json
+
+
+mlruns/*

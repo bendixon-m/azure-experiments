@@ -25,26 +25,11 @@ config.run_config.environment = env
 
 
 # Submit the run
-run = experiment.submit(config)
+with mlflow.start_run() as run:
+    experiment.submit(config)
 
-# Track the run with MLflow
-mlflow.set_experiment(experiment_name)
+# register the model
+model_uri = "runs:/{}/model".format(run.info.run_id)
+model = mlflow.register_model(model_uri, "sklearn_mnist_model")
 
-with mlflow.start_run(run_id=run.id):
-    # Log parameters
-    mlflow.log_param('compute_target', 'ben-small-test')
-    mlflow.log_param('environment', env.name)
-
-    # Monitor the run
-    run.wait_for_completion(show_output=True)
-
-    # Log metrics
-    metrics = run.get_metrics()
-    for key, value in metrics.items():
-        mlflow.log_metric(key, value)
-
-    # Log artifacts
-    artifacts = run.get_file_names()
-    for artifact in artifacts:
-        if artifact.endswith('.pkl') or artifact.endswith('.txt'):
-            mlflow.log_artifact(run.download_file(artifact))
+print(model_uri)

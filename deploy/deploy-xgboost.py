@@ -15,12 +15,21 @@ from azure.ai.ml.constants import AssetTypes
 
 # Provide the model details, including the
 # path to the model files, if you've stored them locally.
-mlflow_model = Model(
-    path="./assets/xgboost_model/",
-    type=AssetTypes.MLFLOW_MODEL,
-    name="credit_defaults_model",
-    description="MLflow Model created from local files.",
+xgboost_model = Model(
+    path="./deploy/assets/xgboost_model/",
+    type=AssetTypes.CUSTOM_MODEL,
+    name="xgboost_model",
+    description="Model created from local files.",
 )
 
 # Register the model
-ml_client.models.create_or_update(mlflow_model)
+ml_client.models.create_or_update(xgboost_model)
+
+registered_model_name = "xgboost_model"
+
+# Let's pick the latest version of the model
+latest_model_version = max(
+    [int(m.version) for m in ml_client.models.list(name=registered_model_name)]
+)
+
+print(latest_model_version)

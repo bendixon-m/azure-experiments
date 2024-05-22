@@ -6,16 +6,22 @@ It was put together using these Azure docs:
 
 * [Python get started](https://learn.microsoft.com/en-us/azure/machine-learning/tutorial-1st-experiment-hello-world?view=azureml-api-1) with Azure ML, focused on running using the Azure ML portal
 * Set up to run remotely, using [configure and submit training jobs](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-set-up-training-targets?view=azureml-api-1#select-a-compute-target)
-* [Train and deploy image classification](https://github.com/Azure/MachineLearningNotebooks/tree/master/tutorials/compute-instance-quickstarts/quickstart-azureml-in-10mins) guide, which uses [these](https://github.com/Azure/MachineLearningNotebooks/tree/master/tutorials/compute-instance-quickstarts/quickstart-azureml-in-10mins) notebooks.
-* There are some examples of training using mlflow [here](https://github.com/Azure/azureml-examples/tree/main/sdk/python/using-mlflow/train-and-log), but these don't run a separate training script
+* [Train a model in Azure ML, SDK v2](https://learn.microsoft.com/en-us/azure/machine-learning/tutorial-train-model?view=azureml-api-2) which includes registering the model with mlflow
 
-There are several jobs/runs defined here:
-* `run-hello.py` - the "Hello world" run, a basic control script giving the URL for the run on the portal
+There are several command jobs defined here, which mostly run custom training jobs:
+* `run-hello.py` - the "Hello world" run, a basic control script giving the URL for the run on the portal but executing no code
 * `run-scikit.py` - trains a model, uses a conda YAML file to configure environment requirements, e.g. numpy, scikit-learn
-* `run-image-classification.py` - trains a model, attempts unsuccessfully to log results using mlflow (various dependency issues and unable to link `run` object with mlflow at the moment)
+* `run-credit-default.py` - trains a model, logs results using mlflow, store results
+
+### Deployment 
+Azure ML creates **endpoints** - a HTTPS path: a URI with TLS and some authentication method, and **deployments** - the resources for hosting the model.  
+
+There is a file to deploy models:
+* `deploy-credit-default.py` - creates an online endpoint using a model trained online
 
 
-
-### To run
+## To run
 
 To run any of these, we have to first authenticate with Azure, using `az login`. The workspace configuration file `config.json` was downloaded from the AZ portal. 
+
+You also need to set up a compute instance and assign a Managed Identity to it, per [these](https://learn.microsoft.com/en-us/answers/questions/1377394/failed-to-pull-docker-image-from-acr-to-azure-ml) instructions. Once set up the compute resource needs to be in the `running` state to run a training job. 

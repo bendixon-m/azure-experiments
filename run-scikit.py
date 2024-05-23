@@ -1,21 +1,35 @@
 # run-scikit.py
+# this uses SDK v2!
 
-from azureml.core import Workspace
-from azureml.core import Experiment
-from azureml.core import Environment
-from azureml.core import ScriptRunConfig
+from azure.ai.ml.entities import Environment
+from azure.ai.ml import MLClient
+from azure.identity import DefaultAzureCredential
+from azure.ai.ml import command
+
 
 if __name__ == "__main__":
-    ws = Workspace.from_config()
-    experiment = Experiment(workspace=ws, name='day1-experiment-train-scitkit-local')
-    config = ScriptRunConfig(source_directory='./src', script='train-scikit.py', compute_target='ben-small-test')
+    credential = DefaultAzureCredential()
+    ml_client = MLClient.from_config(credential)
 
-    # set up environment
-    env = Environment.from_conda_specification(name='scikit-env', file_path='azureml_envs/scikit-env.yaml')
+    custom_job_env = Environment(
+        name="scikit-env",
+        description="Custom environment for basic hello world job",
+        conda_file="azureml_envs/scikit-env.yaml",
+        image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
+    )
 
-    config.run_config.environment = env
+    custom_job_env = ml_client.environments.create_or_update(custom_job_env)
 
-    run = experiment.submit(config)
+    print(
+        f"Environment with name {custom_job_env.name} is registered to workspace, the environment version is {custom_job_env.version}"
+    )
 
-    aml_url = run.get_portal_url()
-    print(aml_url)
+    job = command(
+        code="./src/",
+        command="python train-scikit.py",
+        display_name="run-scitkit-training",
+        environment="scikit-env@latest",
+        compute="ben-small-test" # assigning serverless at the moment gives an error on permissions to access docker registry
+    )
+
+    ml_client.create_or_update(job)

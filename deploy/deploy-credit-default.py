@@ -9,25 +9,6 @@ credential = DefaultAzureCredential()
 # Get a handle to the workspace
 ml_client = MLClient.from_config(credential)
 
-# ### Register a model manually ###
-# Run this later as this will be required for withdrawal model, for now use registered model `credit_defaults_model_ben_local`
-
-# # Import the necessary libraries
-# from azure.ai.ml.entities import Model
-# from azure.ai.ml.constants import AssetTypes
-
-# # Provide the model details, including the
-# # path to the model files, if you've stored them locally.
-# mlflow_model = Model(
-#     path="./deploy/credit_defaults_model/",
-#     type=AssetTypes.MLFLOW_MODEL,
-#     name="credit_defaults_model",
-#     description="MLflow Model created from local files.",
-# )
-
-# # Register the model
-# ml_client.models.create_or_update(mlflow_model)
-
 registered_model_name = "credit_defaults_model_ben_local"
 
 # Let's pick the latest version of the model
@@ -47,6 +28,7 @@ online_endpoint_name = "credit-endpoint-" + str(uuid.uuid4())[:8]
 from azure.ai.ml.entities import ManagedOnlineEndpoint
 
 # define an online endpoint
+# normally you need to specify both an environment and a control script but for MLflow models neither of these are required
 endpoint = ManagedOnlineEndpoint(
     name=online_endpoint_name,
     description="this is an online endpoint and it's great!",

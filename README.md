@@ -18,7 +18,7 @@ Azure ML creates **endpoints** - a HTTPS path: a URI with TLS and some authentic
 
 There is a file to deploy models:
 * `deploy-credit-default.py` - creates an online endpoint using a model trained online
-
+* `deploy-xgboost.py` - this loads a trained xgboost model saved as a json, and then creates an endpoint and deployment. Since it is a custom model, this script also [registers the environment](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-online-endpoints?view=azureml-api-2&tabs=python#register-your-model-and-environment) required for the deployment.
 
 ## To run
 

@@ -34,12 +34,10 @@ def get_latest_model():
     return latest_model
 
 
-def register_environment():
-
-    
+def register_environment():    
     env = Environment(
         image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04",
-        conda_file="./azureml_envs/xgboost.yaml",
+        conda_file="azureml_envs/xgboost.yaml",
         name="xgboost-inference-env",
         description="Environment for xgboost inference created from a Docker image plus Conda environment.",
     )
@@ -106,7 +104,7 @@ def print_endpoint_metadata(endpoint, local=True):
 
 
 if __name__ == "__main__":
-    #upload_model()
+    upload_model()
     local_model = Model(path="deploy/assets/xgboost_model.json")
     env = register_environment()
     online_endpoint_name = "xgboost-model-endpoint-13cb9b54"

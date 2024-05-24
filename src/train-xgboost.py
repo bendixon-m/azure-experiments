@@ -18,31 +18,22 @@ model_xgboost.fit(X_train, y_train)
 print('Making predictions')
 preds = model_xgboost.predict(X_test)
 
-print(preds.shape)
-print(f'Predictions', preds)
 print("Mean squared error: %.2f" % mean_squared_error(y_test, preds))
 
 print('Saving model')
-file_name = './deploy/assets/xgboost_model.json'
+file_name = '../deploy/assets/xgboost_model.json'
 model_xgboost.save_model(file_name)
 
 # Loading the model and running predictions again 
 
-#X_test = X_test[0,:].reshape(1,4)
-print('X test', X_test)
 dtest = xgb.DMatrix(X_test)
 
 model = xgb.Booster()
-model.load_model("deploy/assets/xgboost_model.json")
+model.load_model("../deploy/assets/xgboost_model.json")
 
 loaded_raw_preds = model.predict(dtest)
 loaded_preds = np.argmax(loaded_raw_preds, axis=1)
-print(loaded_preds.shape)
-print(loaded_preds == preds)
-print(loaded_preds.tolist())
-
-
-
+print('Predictions on test set', loaded_preds.tolist()[:4])
 
 # tar_name = '.'.join(file_name.split('.')[:-1]) + ".tar.gz"
 

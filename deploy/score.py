@@ -3,8 +3,9 @@
 import os
 import logging
 import json
-import numpy
+import numpy as np
 import joblib
+import xgboost as xgb
 
 
 def init():
@@ -19,20 +20,26 @@ def init():
     model_path = os.path.join(
         os.getenv("AZUREML_MODEL_DIR"), "xgboost_model.json"
     )
-    # deserialize the model file back into a sklearn model
-    model = joblib.load(model_path)
+    model = xgb.Booster()
+    model.load_model(model_path)
     logging.info("Init complete")
+
 
 
 def run(raw_data):
     """
     This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
-    In the example we extract the data from the json input and call the scikit-learn model's predict()
+    In the example we extract the data from the json input and call the xgboost predict, then return the max class
     method and return the result back
     """
     logging.info("model 1: request received")
     data = json.loads(raw_data)["data"]
-    data = numpy.array(data)
+    data = np.array(data)
+
+    data = xgb.DMatrix(data)
+    raw_preds = model.predict(data)
+    result = np.argmax(raw_preds, axis=1)
+
     result = model.predict(data)
     logging.info("Request processed")
     return result.tolist()

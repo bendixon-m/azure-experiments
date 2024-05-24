@@ -29,7 +29,7 @@ model_xgboost.save_model(file_name)
 # Loading the model and running predictions again 
 
 #X_test = X_test[0,:].reshape(1,4)
-print(X_test.shape)
+print('X test', X_test)
 dtest = xgb.DMatrix(X_test)
 
 model = xgb.Booster()

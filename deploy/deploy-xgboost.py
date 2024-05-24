@@ -85,13 +85,18 @@ def create_deployment(endpoint, env, model, online_endpoint_name, local=True):
     
     blue_deployment = ml_client.online_deployments.begin_create_or_update(
         deployment=blue_deployment, local=local
-    ).result()
+    ) 
 
+    print('Getting status')
+    ml_client.online_endpoints.get(name=online_endpoint_name, local=local)
+
+    # this needs to be run after the endpoint has been created
     # blue deployment takes 100% traffic
     # expect the deployment to take approximately 8 to 10 minutes.
-    print('Route all traffic to blue deployment')
-    endpoint.traffic = {"blue": 100}
-    ml_client.online_endpoints.begin_create_or_update(endpoint).result()
+    # print('Route all traffic to blue deployment')
+    # endpoint.traffic = {"blue": 100}
+    # ml_client.online_endpoints.begin_create_or_update(endpoint).result()
+
 
 
 def print_endpoint_metadata(endpoint, local=True):
@@ -104,11 +109,11 @@ def print_endpoint_metadata(endpoint, local=True):
 
 
 if __name__ == "__main__":
-    upload_model()
+    # upload_model()
     local_model = Model(path="deploy/assets/xgboost_model.json")
     env = register_environment()
     online_endpoint_name = "xgboost-model-endpoint-13cb9b54"
-    endpoint = ml_client.online_endpoints.get(name=online_endpoint_name)
+    endpoint = ml_client.online_endpoints.get(name=online_endpoint_name, local=True)
     latest_model = get_latest_model()
 
 

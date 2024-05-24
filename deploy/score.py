@@ -39,7 +39,5 @@ def run(raw_data):
     data = xgb.DMatrix(data)
     raw_preds = model.predict(data)
     result = np.argmax(raw_preds, axis=1)
-
-    result = model.predict(data)
     logging.info("Request processed")
     return result.tolist()

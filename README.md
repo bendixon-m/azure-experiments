@@ -20,7 +20,7 @@ There is a file to deploy models:
 * `deploy-credit-default.py` - creates an online endpoint using a model trained online
 * `deploy-xgboost.py` - this loads a trained xgboost model saved as a json, and then creates an endpoint and deployment. Since it is a custom model, this script also [registers the environment](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-online-endpoints?view=azureml-api-2&tabs=python#register-your-model-and-environment) required for the deployment.
 
-## To run
+## To run
 
 To run any of these, we have to first authenticate with Azure, using `az login`. The workspace configuration file `config.json` was downloaded from the AZ portal. 
 

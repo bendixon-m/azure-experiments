@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 data = load_iris()
-X_train, X_test, y_train, y_test = train_test_split(data['data'], data['target'], test_size=.2)
+X_train, X_test, y_train, y_test = train_test_split(data['data'], data['target'], test_size=.2, random_state=42)
 model_xgboost = XGBClassifier(n_estimators=2, max_depth=2, learning_rate=1, objective='binary:logistic')
 
 print('Fitting model')

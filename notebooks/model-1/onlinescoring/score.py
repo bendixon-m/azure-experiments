@@ -1,5 +1,3 @@
-# scoring script https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-online-endpoints?view=azureml-api-2&tabs=python#understand-the-scoring-script
-
 import os
 import logging
 import json
@@ -15,9 +13,8 @@ def init():
     global model
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
-    # Please provide your model's folder name if there is one
     model_path = os.path.join(
-        os.getenv("AZUREML_MODEL_DIR"), "xgboost_model.json"
+        os.getenv("AZUREML_MODEL_DIR"), "sklearn_regression_model.pkl"
     )
     # deserialize the model file back into a sklearn model
     model = joblib.load(model_path)
@@ -30,7 +27,7 @@ def run(raw_data):
     In the example we extract the data from the json input and call the scikit-learn model's predict()
     method and return the result back
     """
-    logging.info("model 1: request received")
+    logging.info("Request received")
     data = json.loads(raw_data)["data"]
     data = numpy.array(data)
     result = model.predict(data)

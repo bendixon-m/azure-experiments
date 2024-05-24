@@ -17,7 +17,7 @@ REGISTERED_MODEL_NAME = "xgboost_model"
 
 def upload_model():
     xgboost_model = Model(
-        path="./deploy/assets/xgboost_model.json",
+        path="deploy/assets/xgboost_model.json",
         type=AssetTypes.CUSTOM_MODEL,
         name=REGISTERED_MODEL_NAME,
         description="Model created from local files.",
@@ -35,6 +35,8 @@ def get_latest_model():
 
 
 def register_environment():
+
+    
     env = Environment(
         image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04",
         conda_file="./azureml_envs/xgboost.yaml",
@@ -63,7 +65,10 @@ def create_endpoint():
     return endpoint.name
 
 
-def create_deployment(endpoint, env, model, online_endpoint_name):
+def create_deployment(endpoint, env, model, online_endpoint_name, local=True):
+
+    """Creates a deployment of the specified endpoint, defaulting to local. 
+    """
 
     blue_deployment = ManagedOnlineDeployment(
         name="blue",
@@ -72,7 +77,7 @@ def create_deployment(endpoint, env, model, online_endpoint_name):
         instance_type="Standard_DS3_v2",
         instance_count=1,
         code_configuration=CodeConfiguration(
-            code="./deploy/", 
+            code="deploy/", 
             scoring_script="score.py"
         ),
         environment=env
@@ -81,7 +86,7 @@ def create_deployment(endpoint, env, model, online_endpoint_name):
     print('Create online deployment (blue)')
     
     blue_deployment = ml_client.online_deployments.begin_create_or_update(
-        blue_deployment
+        deployment=blue_deployment, local=local
     ).result()
 
     # blue deployment takes 100% traffic
@@ -91,8 +96,8 @@ def create_deployment(endpoint, env, model, online_endpoint_name):
     ml_client.online_endpoints.begin_create_or_update(endpoint).result()
 
 
-def print_endpoint_metadata(endpoint):
-    endpoint = ml_client.online_endpoints.get(name=online_endpoint_name)
+def print_endpoint_metadata(endpoint, local=True):
+    endpoint = ml_client.online_endpoints.get(name=online_endpoint_name, local=local)
     print(
         f"Name: {endpoint.name}\nStatus: {endpoint.provisioning_state}\nDescription: {endpoint.description}"
     )
@@ -101,10 +106,12 @@ def print_endpoint_metadata(endpoint):
 
 
 if __name__ == "__main__":
-    upload_model()
+    #upload_model()
+    local_model = Model(path="deploy/assets/xgboost_model.json")
+    env = register_environment()
     online_endpoint_name = "xgboost-model-endpoint-13cb9b54"
     endpoint = ml_client.online_endpoints.get(name=online_endpoint_name)
     latest_model = get_latest_model()
-    env = "xgboost-inference-env:10"
 
-    create_deployment(endpoint, env, latest_model, online_endpoint_name)
+
+    create_deployment(endpoint, env, local_model, online_endpoint_name, local=True)

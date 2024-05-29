@@ -57,6 +57,16 @@ class AzureMLBatchDeployment:
     def use_preregistered_model(self, model_name: str):
         self.model = self.ml_client.models.get(name=model_name, label="latest")
     
+    def create_compute(self, compute_name: str):
+        if not any(filter(lambda m: m.name == compute_name, self.ml_client.compute.list())):
+            compute_cluster = AmlCompute(
+                name=compute_name,
+                description="CPU cluster compute",
+                min_instances=0,
+                max_instances=2,
+            )
+        self.ml_client.compute.begin_create_or_update(compute_cluster).result()
+
     def create_environment(self, env_name: str):
         self.env = Environment(
             name=env_name,
@@ -96,15 +106,33 @@ class AzureMLBatchDeployment:
         endpoint.defaults.deployment_name = self.deployment.name
         self.ml_client.batch_endpoints.begin_create_or_update(endpoint).result()
     
-    def invoke_batch_endpoint(self):
-        self.job = self.ml_client.batch_endpoints.invoke(
-            endpoint_name=self.endpoint_name,
-            deployment_name=self.deployment.name,
-            input=Input(
-                path="assets/batch-requests",
-                type=AssetTypes.URI_FOLDER
+    def invoke_batch_endpoint(self, location="default"):
+        if location == "default":
+            self.job = self.ml_client.batch_endpoints.invoke(
+                endpoint_name=self.endpoint_name,
+                deployment_name=self.deployment.name,
+                input=Input(
+                    path="assets/batch-requests",
+                    type=AssetTypes.URI_FOLDER
+                )
             )
-        )
+        elif location == "azuredatastore":
+            #  find the ID of a data store registered in AzureML
+            self.batch_ds = self.ml_client.datastores.get_default()
+            filename = f"predictions-{random.randint(0,99999)}.csv"
+
+            self.job = self.ml_client.batch_endpoints.invoke(
+                endpoint_name=self.endpoint_name,
+                input=Input(
+                    path="assets/batch-requests",
+                    type=AssetTypes.URI_FOLDER,
+                ),
+                params_override=[
+                    {"output_dataset.datastore_id": f"azureml:{self.batch_ds.id}"},
+                    {"output_dataset.path": f"/{self.endpoint_name}/"},
+                    {"output_file_name": filename},
+                ],
+            )
 
     def download_results(self, download_path):
         time.sleep(120) # ensuring all resources are available 
@@ -113,6 +141,7 @@ class AzureMLBatchDeployment:
         self.ml_client.jobs.download(name=scoring_job.name, 
                                      download_path=download_path, 
                                      output_name="score")
+        
 
 if __name__ == '__main__':
 

@@ -26,19 +26,22 @@ def init():
 
 def run(mini_batch: List[str]) -> pd.DataFrame:
     """
-    This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
-    In the example we extract the data from the json input and call the xgboost predict, then return the max class
-    method and return the result back
+    This function is called on each batch run to perform the actual scoring/prediction.
+    In the example we loop through the batch and extract the data from the json input and call the xgboost predict, 
+    then return the max class method and return the result back.
     """
     print(f"Executing run method over batch of {len(mini_batch)} files.")
     results = []
     for file_path in mini_batch:
         with open(file_path, 'r') as f:
-            data = json.load(f)  
+            file = json.load(f)
+            data = file["data"]
             raw_data = np.array(data)
             raw_data = raw_data.reshape(1, -1)
             input_data = xgb.DMatrix(raw_data) 
-            result = model.predict(input_data)
+            raw_preds = model.predict(input_data)
+            result = np.argmax(raw_preds, axis=1)
             results.append(result.tolist())
 
     return pd.DataFrame(results)
+

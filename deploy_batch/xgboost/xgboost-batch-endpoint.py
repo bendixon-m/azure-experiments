@@ -106,8 +106,8 @@ class AzureMLBatchDeployment:
         endpoint.defaults.deployment_name = self.deployment.name
         self.ml_client.batch_endpoints.begin_create_or_update(endpoint).result()
     
-    def invoke_batch_endpoint(self, location="default"):
-        if location == "default":
+    def invoke_batch_endpoint(self, output_location="default"):
+        if output_location == "default":
             self.job = self.ml_client.batch_endpoints.invoke(
                 endpoint_name=self.endpoint_name,
                 deployment_name=self.deployment.name,
@@ -116,7 +116,7 @@ class AzureMLBatchDeployment:
                     type=AssetTypes.URI_FOLDER
                 )
             )
-        elif location == "azuredatastore":
+        elif output_location == "azuredatastore":
             #  find the ID of a data store registered in AzureML
             self.batch_ds = self.ml_client.datastores.get_default()
             filename = f"predictions-{random.randint(0,99999)}.csv"
@@ -146,11 +146,11 @@ class AzureMLBatchDeployment:
 if __name__ == '__main__':
 
     deployment = AzureMLBatchDeployment()
-    deployment.create_batch_endpoint()
-    # deployment.use_existing_batch_endpoint("xgboost-batch-8i8og")
+    # deployment.create_batch_endpoint()
+    deployment.use_existing_batch_endpoint("xgboost-batch-8i8og")
     deployment.use_preregistered_model("xgboost_model")
     deployment.use_existing_environment("xgboost-batch-inference-env")
     deployment.create_deployment("ben-small-test")
     deployment.set_deployment_as_default()
-    deployment.invoke_batch_endpoint()
-    deployment.download_results(download_path=".")
+    deployment.invoke_batch_endpoint(output_location="azuredatastore")
+    # deployment.download_results(download_path=".")

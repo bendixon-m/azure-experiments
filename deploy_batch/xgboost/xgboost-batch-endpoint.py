@@ -33,14 +33,14 @@ class AzureMLBatchDeployment:
         self.credential = DefaultAzureCredential()
         self.ml_client = MLClient.from_config(self.credential)
 
-    def create_batch_endpoint(self):
-        self.endpoint_name = "xgboost-batch"
+    def create_batch_endpoint(self, model_name):
+        self.endpoint_name = f"{model_name}-batch"
         allowed_chars = string.ascii_lowercase + string.digits
         endpoint_suffix = "".join(random.choice(allowed_chars) for x in range(5))
         self.endpoint_name = f"{self.endpoint_name}-{endpoint_suffix}"
         self.endpoint = BatchEndpoint(
             name=self.endpoint_name,
-            description="A batch endpoint for returning xgboost inferences"
+            description=f"A batch endpoint for returning {model_name} inferences"
         )
         self.ml_client.begin_create_or_update(self.endpoint).result()
 
@@ -60,8 +60,9 @@ class AzureMLBatchDeployment:
     def use_preregistered_model(self, model_name: str):
         self.model = self.ml_client.models.get(name=model_name, label="latest")
     
-    def create_compute(self, compute_name: str):
-        if not any(filter(lambda m: m.name == compute_name, self.ml_client.compute.list())):
+    def create_serverless_compute_cluster(self, compute_name: str):
+        if not any(filter(lambda m: m.name == compute_name, 
+                          self.ml_client.compute.list())):
             compute_cluster = AmlCompute(
                 name=compute_name,
                 description="CPU cluster compute",
@@ -70,30 +71,33 @@ class AzureMLBatchDeployment:
             )
         self.ml_client.compute.begin_create_or_update(compute_cluster).result()
 
-    def create_environment(self, env_name: str):
+    def create_environment(self, env_name: str, env_conda_file):
         self.env = Environment(
             name=env_name,
-            conda_file="assets/conda.yaml",
+            conda_file=env_conda_file,
             image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
         )
 
-    def use_existing_environment(self, env_name: str):
-        self.env = f"{env_name}@latest"
+    def use_existing_environment(self, env_name: str, version: any = "latest"):
+        if version == "latest":
+            self.env = f"{env_name}@latest"
+        else:
+            self.env = f"{env_name}:{version}"
 
-    def create_deployment(self, compute_name: str):
+    def create_deployment(self, scoring_script: str, compute_name: str):
         self.deployment = ModelBatchDeployment(
             name="iris-xgboost-depl",
             description="A deployment using xgboost to classify Iris data.",
             endpoint_name=self.endpoint_name,
             model=self.model,
             code_configuration=CodeConfiguration(
-                code="assets/", scoring_script="batch_driver.py"
+                code="assets/", scoring_script=scoring_script
             ),
             environment=self.env,
             compute=compute_name,
             settings=ModelBatchDeploymentSettings(
                 max_concurrency_per_instance=1,
-                mini_batch_size=4, # specific to this data set
+                mini_batch_size=10, # specific to this data set
                 instance_count=1,
                 output_action=BatchDeploymentOutputAction.APPEND_ROW,
                 output_file_name="predictions.csv",
@@ -149,11 +153,14 @@ class AzureMLBatchDeployment:
 if __name__ == '__main__':
 
     deployment = AzureMLBatchDeployment()
-    # deployment.create_batch_endpoint()
-    deployment.use_existing_batch_endpoint("xgboost-batch-8i8og")
-    deployment.use_preregistered_model("xgboost_model")
-    deployment.use_existing_environment("xgboost-batch-inference-env")
-    deployment.create_deployment("ben-small-test")
+    # deployment.create_batch_endpoint(model_name="xgboost")
+    deployment.use_existing_batch_endpoint(endpoint_name="xgboost-batch-8i8og")
+    deployment.use_preregistered_model(model_name="xgboost_model")
+    deployment.use_existing_environment(env_name="xgboost-batch-inference-env")
+    # deployment.create_environment(env_name="xgboost-batch-inference-env", 
+    #                               env_conda_file="assets/conda.yaml")
+    deployment.create_deployment(scoring_script="batch_driver.py", 
+                                 compute_name="ben-small-test")
     deployment.set_deployment_as_default()
-    deployment.invoke_batch_endpoint(output_location="azuredatastore")
-    # deployment.download_results(download_path=".")
+    deployment.invoke_batch_endpoint()
+    deployment.download_results(download_path=".")

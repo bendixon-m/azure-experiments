@@ -1,3 +1,4 @@
+"""Based on Azure docs: https://github.com/Azure/azureml-examples/tree/main/sdk/python/endpoints/batch/deploy-models/mnist-classifier"""
 import logging
 import random
 import string
@@ -23,7 +24,9 @@ class AzureMLBatchDeployment:
 
     """
     Sets up the resources required and deployment for a batch endpoint in Azure 
-    ML workspace. 
+    ML workspace. Based on the Azure docs in the Azure/azureml-examples/ repo
+    under sdk/python/endpoints/batch/deploy-models/mnist-classifier, adapted 
+    for XGBoost. Requires the file `batch_driver.py`. 
     """
 
     def __init__(self):    
@@ -90,7 +93,7 @@ class AzureMLBatchDeployment:
             compute=compute_name,
             settings=ModelBatchDeploymentSettings(
                 max_concurrency_per_instance=1,
-                mini_batch_size=4,
+                mini_batch_size=4, # specific to this data set
                 instance_count=1,
                 output_action=BatchDeploymentOutputAction.APPEND_ROW,
                 output_file_name="predictions.csv",
